@@ -86,7 +86,7 @@ exports.forgotPasswordMail = async (user) => {
       },
       '1d'
     );
-    
+
     let forgotPasswordUrl = `${environment.FRONTEND_URL}reset-password/user?accesstoken=${token}`;
     const mailObj = {
       email: user?.Email,
@@ -109,7 +109,7 @@ exports.notificationMail = async (userData) => {
 
   const mailObj = {
     email: userData.email,
-    subject: "goodDay-chat notification",
+    subject: "goodday-chat notification",
     root: "../email-templates/notification.ejs",
     templateData: { name: name, msg: msg, url: redirectUrl },
   };
@@ -125,7 +125,7 @@ exports.notificationMailOnInvite = async (userData) => {
 
   const mailObj = {
     email: userData.email,
-    subject: "goodDay.chat notification",
+    subject: "goodday.chat notification",
     root: "../email-templates/notification.ejs",
     templateData: { name: name, msg: msg, url: redirectUrl },
   };
@@ -144,7 +144,7 @@ exports.approveUser = async (userData) => {
 
   const mailObj = {
     email: userData.email,
-    subject: "goodDay.chat notification",
+    subject: "goodday.chat notification",
     root: "../email-templates/approve-user.ejs",
     templateData: { name: name, msg: msg, url: redirectUrl },
   };
@@ -167,7 +167,7 @@ exports.executeQuery = async (query, values = []) => {
 exports.registeredUser = async (adminMail,userName) => {
   let redirectUrl = `${environment.FRONTEND_URL}profile-chats`;
 
-  let msg = `${userName} has registered for messaging on goodDay-chat.`;
+  let msg = `${userName} has registered for messaging on goodday-chat.`;
   const mailObj = {
     email: adminMail,
     subject: "New User has been registered",
