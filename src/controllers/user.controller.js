@@ -549,7 +549,6 @@ exports.createAdmin = async function (req, res) {
       await User.changeAdminAccess(
         user.Id,
         user.IsAdmin,
-        user.AccountType,
         async function (err, result) {
           if (err) {
             return utils.send500(res, err);
