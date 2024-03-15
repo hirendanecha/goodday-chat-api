@@ -109,7 +109,7 @@ exports.notificationMail = async (userData) => {
 
   const mailObj = {
     email: userData.email,
-    subject: "goodday-chat notification",
+    subject: "GoodDay.chat notification",
     root: "../email-templates/notification.ejs",
     templateData: { name: name, msg: msg, url: redirectUrl },
   };
@@ -125,7 +125,7 @@ exports.notificationMailOnInvite = async (userData) => {
 
   const mailObj = {
     email: userData.email,
-    subject: "goodday.chat notification",
+    subject: "GoodDay.chat notification",
     root: "../email-templates/notification.ejs",
     templateData: { name: name, msg: msg, url: redirectUrl },
   };
@@ -144,7 +144,7 @@ exports.approveUser = async (userData) => {
 
   const mailObj = {
     email: userData.email,
-    subject: "goodday.chat notification",
+    subject: "GoodDay.chat notification",
     root: "../email-templates/approve-user.ejs",
     templateData: { name: name, msg: msg, url: redirectUrl },
   };
@@ -167,7 +167,7 @@ exports.executeQuery = async (query, values = []) => {
 exports.registeredUser = async (adminMail,userName) => {
   let redirectUrl = `${environment.FRONTEND_URL}profile-chats`;
 
-  let msg = `${userName} has registered for messaging on goodday-chat.`;
+  let msg = `${userName} has registered for messaging on GoodDay.chat.`;
   const mailObj = {
     email: adminMail,
     subject: "New User has been registered",
