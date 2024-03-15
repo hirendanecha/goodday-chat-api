@@ -91,9 +91,9 @@ User.login = function (email, Id, result) {
             {
               id: res[0].profileId,
               username: res[0].Username,
-              active: res[0].IsActive
+              active: res[0].IsActive,
             },
-            '5d'
+            "5d"
           );
 
           return result(null, {
@@ -287,9 +287,9 @@ User.adminLogin = function (email, result) {
           {
             id: res[0].profileId,
             username: res[0].Username,
-            active: res[0].IsActive
+            active: res[0].IsActive,
           },
-          '5d'
+          "5d"
         );
 
         return result(null, {
@@ -454,10 +454,10 @@ User.verification = function (token, result) {
     try {
       const updateQuery = await executeQuery(
         "UPDATE users SET IsActive ='Y' WHERE Id = ?",
-        [decoded.userId]
+        [decoded.user.userId]
       );
       const fetchUser = await executeQuery("select * from users where Id = ?", [
-        decoded.userId,
+        decoded.user.userId,
       ]);
       console.log("fetchUser", updateQuery, fetchUser);
       return result(null, fetchUser[0]);
