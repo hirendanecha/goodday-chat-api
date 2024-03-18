@@ -339,9 +339,17 @@ exports.activateMedia = async function (req, res) {
         if (err) {
           return utils.send500(res, err);
         } else {
-          const message = req.query?.MediaApproved
-            ? `${name} Account has been Approved`
-            : `${name} Account has been Rejected`;
+          // const message = req.query?.MediaApproved
+          //   // ? `${name} Account has been Approved`
+          //   ? `Congratulations, ${name}! Your account has been successfully approved.`
+          //   : `${name}, your account approval request has been rejected by admin. `;
+          
+          let message = "";
+          if (req.query.MediaApproved === "1") {
+            message = `Congratulations, ${name}! Your account has been successfully approved.`;
+          } else {
+            message = `${name}, your account approval request has been rejected by admin.`;
+          }
 
           const userDetails = {
             firstName: user.FirstName,
@@ -549,12 +557,12 @@ exports.createAdmin = async function (req, res) {
       await User.changeAdminAccess(
         user.Id,
         user.IsAdmin,
-        user.AccountType,
         async function (err, result) {
           if (err) {
             return utils.send500(res, err);
           } else {
-            let message = "You're now Master-Admin!";
+            // let message = "You're now Master-Admin!";
+            let message = "We're thrilled to announce that you've been granted Master Admin/ Admin privileges on our platform! 🎉";
             const userDetails = {
               firstName: user.FirstName,
               lastName: user.LastName,

@@ -6,6 +6,7 @@ const authorize = require("../middleware/authorize");
 
 router.post("/register", userController.create);
 router.post("/profile", profileController.create);
+router.post("/get-meta", userController.getMeta);
 router.get("/user/verification/:token", userController.verification);
 router.get("/countries", userController.getZipCountries);
 router.get("/zip/:zip", userController.getZipData);

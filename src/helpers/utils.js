@@ -59,7 +59,8 @@ exports.registrationMail = async (userData, userId) => {
 
   const mailObj = {
     email: userData.Email,
-    subject: "Account Activation link",
+    // subject: "Account Activation link",
+    subject: "Welcome to GoodDay.chat, Activate Your Account Now!",
     root: "../email-templates/registration.ejs",
     templateData: { name: name, url: registerUrl },
   };
@@ -90,7 +91,8 @@ exports.forgotPasswordMail = async (user) => {
     let forgotPasswordUrl = `${environment.FRONTEND_URL}reset-password/user?accesstoken=${token}`;
     const mailObj = {
       email: user?.Email,
-      subject: "Forgot password",
+      // subject: "Forgot password",
+      subject: "Reset Your GoodDay.chat Password",
       root: "../email-templates/forgot-password.ejs",
       templateData: { name: name, url: forgotPasswordUrl },
     };
