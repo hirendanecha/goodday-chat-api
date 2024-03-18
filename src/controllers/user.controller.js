@@ -339,10 +339,17 @@ exports.activateMedia = async function (req, res) {
         if (err) {
           return utils.send500(res, err);
         } else {
-          const message = req.query?.MediaApproved
-            // ? `${name} Account has been Approved`
-            ? `Congratulations, ${name}! Your account has been successfully approved.`
-            : `${name}, your account approval request has been rejected by admin. `;
+          // const message = req.query?.MediaApproved
+          //   // ? `${name} Account has been Approved`
+          //   ? `Congratulations, ${name}! Your account has been successfully approved.`
+          //   : `${name}, your account approval request has been rejected by admin. `;
+          
+          let message = "";
+          if (req.query.MediaApproved === "1") {
+            message = `Congratulations, ${name}! Your account has been successfully approved.`;
+          } else {
+            message = `${name}, your account approval request has been rejected by admin.`;
+          }
 
           const userDetails = {
             firstName: user.FirstName,
