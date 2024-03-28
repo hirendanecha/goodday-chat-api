@@ -54,12 +54,18 @@ exports.getRoom = async function (req, res) {
 
 exports.getMedia = async function (req, res) {
   try {
-    const { roomId, groupId } = req.body;
-    const mediaList = await Message.getMedia(roomId, groupId);
-    if (mediaList.length) {
-      res.send({ error: false, data: mediaList });
+    const { roomId, groupId, page, size } = req.body;
+    const { limit, offset } = getPagination(page, size);
+    const data = await Message.getMedia(roomId, groupId, limit, offset);
+    if (data) {
+      const mediaList = getPaginationData(
+        { count: data.count, docs: data.mediaList },
+        page,
+        limit
+      );
+      return res.send(mediaList);
     } else {
-      res.send({ error: false, data: [] });
+      res.send({ error: false, message: "no media found" });
     }
   } catch (error) {
     return error;
