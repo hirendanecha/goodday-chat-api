@@ -51,3 +51,17 @@ exports.getRoom = async function (req, res) {
     return error;
   }
 };
+
+exports.getMedia = async function (req, res) {
+  try {
+    const { roomId, groupId } = req.body;
+    const mediaList = await Message.getMedia(roomId, groupId);
+    if (mediaList.length) {
+      res.send({ error: false, data: mediaList });
+    } else {
+      res.send({ error: false, data: [] });
+    }
+  } catch (error) {
+    return error;
+  }
+};

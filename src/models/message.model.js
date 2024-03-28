@@ -102,4 +102,18 @@ Messages.getRoom = async function (id) {
   }
 };
 
+Messages.getMedia = async function (roomId, groupId) {
+  try {
+    const query = `select m.messageMedia,m.createdDate,m.sentBy,p.Username,p.FirstName from messages as m left join profile as p on p.ID = m.sentBy where m.messageMedia is not null and m.roomId =${roomId} or m.groupId = ${groupId} GROUP BY m.id order by m.createdDate desc`;
+    const mediaList = await executeQuery(query);
+    if (mediaList) {
+      return mediaList;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    return error;
+  }
+};
+
 module.exports = Messages;
