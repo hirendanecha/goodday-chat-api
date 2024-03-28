@@ -105,7 +105,7 @@ Messages.getRoom = async function (id) {
 Messages.getMedia = async function (roomId, groupId, limit, offset) {
   try {
     const searchCount = await executeQuery(
-      `SELECT count(m.id) as count FROM messages as m WHERE roomId = ${roomId} or groupId = ${groupId}`
+      `SELECT count(m.id) as count FROM messages as m WHERE messageMedia is not null and (roomId = ${roomId} or groupId = ${groupId})`
     );
     const query = `select m.messageMedia,m.createdDate,m.sentBy,p.Username,p.FirstName from messages as m left join profile as p on p.ID = m.sentBy where m.messageMedia is not null and (m.roomId = ${roomId} or m.groupId = ${groupId}) GROUP BY m.id order by m.createdDate desc limit ? offset ?`;
     const values = [limit, offset];
