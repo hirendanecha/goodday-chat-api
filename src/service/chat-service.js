@@ -720,18 +720,22 @@ const createGroups = async function (params) {
             groupId: params?.groupId,
             profileId: id,
           };
-          const memberId = await addMembers(data);
-          if (memberId) {
-            console.log("ids==>", id);
-            const notification = await createNotification({
-              notificationByProfileId: params?.profileId,
-              notificationToProfileId: id,
-              actionType: "M",
-              groupId: params?.groupId,
-              msg: `added you in chat group`,
-            });
-            notifications.push(notification);
+          if (!params.isUpdate) {
+            const memberId = await addMembers(data);
           }
+          console.log("ids==>", id);
+          const notification = await createNotification({
+            notificationByProfileId: params?.profileId,
+            notificationToProfileId: id,
+            actionType: "M",
+            groupId: params?.groupId,
+            msg: `${
+              params?.isUpdate
+                ? "changed group details"
+                : "added you in chat group"
+            }`,
+          });
+          notifications.push(notification);
         }
       } else {
         groupList = await getGroup(params);
@@ -739,7 +743,7 @@ const createGroups = async function (params) {
         return { groupList };
       }
       groupList = await getGroup(params);
-      return { notifications, groupList };
+      return { notifications, groupList, groupId: params?.groupId };
     }
   } catch (error) {
     return error;
