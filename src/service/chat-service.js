@@ -250,7 +250,7 @@ const sendMessage = async function (params) {
           const values = [data.messageText, date, data.groupId];
           const updatedGroup = await executeQuery(query, values);
           const notification = await createNotification({
-            notificationToProfileId: params.profileId,
+            // notificationToProfileId: params.profileId,
             groupId: data?.groupId,
             notificationByProfileId: data?.sentBy,
             actionType: "M",
