@@ -494,36 +494,32 @@ const deleteMessage = async function (params) {
           "select * from messages where roomId = ? order by createdDate desc limit 1";
         const values = data.roomId;
         [messageList] = await executeQuery(query, values);
-        if (messageList) {
-          const query1 = `update chatRooms set lastMessageText = ?,updatedDate = ? where id = ?`;
-          const values1 = [
-            messageList?.messageText || null,
-            messageList.createdDate,
-            data.roomId,
-          ];
-          const updatedRoom = await executeQuery(query1, values1);
-          console.log("updateRoom->", updatedRoom);
-          data.isDeleted = true;
-          return data;
-        }
+        const query1 = `update chatRooms set lastMessageText = ?,updatedDate = ? where id = ?`;
+        const values1 = [
+          messageList?.messageText || null,
+          messageList?.createdDate,
+          data.roomId,
+        ];
+        const updatedRoom = await executeQuery(query1, values1);
+        console.log("updateRoom->", updatedRoom);
+        data.isDeleted = true;
+        return data;
       }
       if (data?.groupId) {
         const query =
           "select * from messages where groupId = ? order by createdDate desc limit 1";
         const values = data.groupId;
         [messageList] = await executeQuery(query, values);
-        if (messageList) {
-          const query1 = `update chatGroups set lastMessageText = ?,updatedDate = ? where id = ?`;
-          const values1 = [
-            messageList?.messageText || null,
-            messageList.createdDate,
-            data.groupId,
-          ];
-          const updatedRoom = await executeQuery(query1, values1);
-          console.log("updateRoom->", updatedRoom);
-          data.isDeleted = true;
-          return data;
-        }
+        const query1 = `update chatGroups set lastMessageText = ?,updatedDate = ? where id = ?`;
+        const values1 = [
+          messageList?.messageText || null,
+          messageList?.createdDate,
+          data.groupId,
+        ];
+        const updatedRoom = await executeQuery(query1, values1);
+        console.log("updateRoom->", updatedRoom);
+        data.isDeleted = true;
+        return data;
       }
       console.log("messageList", messageList);
     }
