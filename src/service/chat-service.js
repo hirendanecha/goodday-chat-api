@@ -86,6 +86,10 @@ exports.readGroupMessage = async function (data) {
   return await readGroupMessage(data);
 };
 
+exports.resendRoom = async function (data) {
+  return await resendRoom(data);
+};
+
 const getChatList = async function (params) {
   try {
     // const query = `select r.id as roomId,count(m.id) as unReadMessage ,r.profileId1 as createdBy, r.isAccepted,p.ID as profileId,p.Username,p.FirstName,p.lastName,p.ProfilePicName from chatRooms as r join profile as p on p.ID = CASE
@@ -858,5 +862,46 @@ const readGroupMessage = async function (params) {
     return readUsers;
   } catch (error) {
     return null;
+  }
+};
+
+const resendRoom = async function (params) {
+  try {
+    const data = {
+      id: params?.roomId,
+    };
+    const query = `update chatRooms set createdDate = now(),updatedDate = now() where id = ?`;
+    const values = [data.id];
+    const message = await executeQuery(query, values);
+    let notification = {};
+    if (params.profileId && params.createdBy) {
+      notification = await createNotification({
+        notificationByProfileId: params?.createdBy,
+        notificationToProfileId: params?.profileId,
+        actionType: "M",
+        roomId: params?.roomId,
+        msg: "invited you to private chat",
+      });
+      const findUser = `select u.Email,p.FirstName,p.LastName,p.Username from users as u left join profile as p on p.UserID = u.Id where p.ID = ?`;
+      const values1 = [notification.notificationToProfileId];
+      const userData = await executeQuery(findUser, values1);
+      const findSenderUser = `select p.ID,p.Username,p.FirstName,p.LastName from profile as p where p.ID = ?`;
+      const values2 = [notification.notificationByProfileId];
+      const senderData = await executeQuery(findSenderUser, values2);
+      const userDetails = {
+        email: userData[0].Email,
+        profileId: senderData[0].ID,
+        userName: userData[0].Username,
+        senderUsername: senderData[0].Username,
+        firstName: userData[0].FirstName,
+        msg: `${senderData[0].Username} invited you to private chat`,
+      };
+      await notificationMailOnInvite(userDetails);
+      return { notification };
+    } else {
+      return { data };
+    }
+  } catch (error) {
+    return error;
   }
 };

@@ -672,6 +672,32 @@ socket.config = (server) => {
         cb(error);
       }
     });
+
+    socket.on("resend-chat-invite", async (params, cb) => {
+      logger.info("resend-chat-invite", {
+        ...params,
+        address,
+        id: socket.id,
+        method: "resend-chat-invite",
+      });
+      try {
+        if (params) {
+          const data = await chatService.resendRoom(params);
+          console.log(data);
+          if (data.notification) {
+            io.to(`${data.notification.notificationToProfileId}`).emit(
+              "notification",
+              data.notification
+            );
+          }
+          if (cb) {
+            return cb(data);
+          }
+        }
+      } catch (error) {
+        cb(error);
+      }
+    });
   });
 };
 
