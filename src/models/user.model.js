@@ -47,6 +47,7 @@ User.login = function (email, Id, result) {
             p.ChannelType,
             p.DefaultUniqueLink,
             p.UniqueLink,
+            p.userStatus,
             p.AccountType
      FROM users as u left join profile as p on p.UserID = u.Id AND p.AccountType in ('I','M') WHERE u.Email = ? OR u.Username = ? AND u.Id = ?`,
     [email, email, Id],

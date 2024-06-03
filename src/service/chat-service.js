@@ -90,6 +90,13 @@ exports.resendRoom = async function (data) {
   return await resendRoom(data);
 };
 
+exports.userStatus = async function (id) {
+  return await userStatus(id);
+};
+exports.changeUserStatus = async function (data) {
+  return await changeUserStatus(data);
+};
+
 const getChatList = async function (params) {
   try {
     // const query = `select r.id as roomId,count(m.id) as unReadMessage ,r.profileId1 as createdBy, r.isAccepted,p.ID as profileId,p.Username,p.FirstName,p.lastName,p.ProfilePicName from chatRooms as r join profile as p on p.ID = CASE
@@ -901,6 +908,30 @@ const resendRoom = async function (params) {
     } else {
       return { data };
     }
+  } catch (error) {
+    return error;
+  }
+};
+
+const userStatus = async function (id) {
+  try {
+    const query = `select userStatus from profile where ID = ${id}`;
+    const [status] = await executeQuery(query);
+    return status.userStatus;
+  } catch (error) {
+    return error;
+  }
+};
+
+const changeUserStatus = async function (params) {
+  try {
+    const query = `update profile set userStatus = '${params.status}' where ID = ${params.id}`;
+    await executeQuery(query);
+    const data = {
+      status: params.status,
+      id: params.id,
+    };
+    return data;
   } catch (error) {
     return error;
   }

@@ -77,7 +77,7 @@ socket.config = (server) => {
         method: "join",
       });
     });
-    socket.on("online-users", (cb) => {
+    socket.on("online-users", async (cb) => {
       logger.info("online user", {
         id: socket.id,
         method: "online",
@@ -85,7 +85,17 @@ socket.config = (server) => {
       });
       const newUserId = socket.user.id;
       if (!onlineUsers.some((user) => user.userId === newUserId)) {
-        onlineUsers.push({ userId: newUserId, socketId: socket.id });
+        const status = await chatService.userStatus(newUserId);
+        console.log("userStatus", status);
+        if (status) {
+          onlineUsers.push({
+            userId: newUserId,
+            socketId: socket.id,
+            status: status,
+          });
+        } else {
+          onlineUsers.push({ userId: newUserId, socketId: socket.id });
+        }
       }
       io.emit("get-users", onlineUsers);
       // return cb(onlineUsers);
@@ -690,6 +700,24 @@ socket.config = (server) => {
               data.notification
             );
           }
+          if (cb) {
+            return cb(data);
+          }
+        }
+      } catch (error) {
+        cb(error);
+      }
+    });
+    socket.on("change-status", async (params, cb) => {
+      logger.info("change-status", {
+        ...params,
+        address,
+        id: socket.id,
+        method: "change-status",
+      });
+      try {
+        if (params) {
+          const data = await chatService.changeUserStatus(params);
           if (cb) {
             return cb(data);
           }
