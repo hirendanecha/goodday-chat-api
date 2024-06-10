@@ -343,7 +343,7 @@ exports.activateMedia = async function (req, res) {
           //   // ? `${name} Account has been Approved`
           //   ? `Congratulations, ${name}! Your account has been successfully approved.`
           //   : `${name}, your account approval request has been rejected by admin. `;
-          
+
           let message = "";
           if (req.query.MediaApproved === "1") {
             message = `Congratulations, ${name}! Your account has been successfully approved.`;
@@ -465,7 +465,8 @@ exports.verification = function (req, res) {
     if (err) {
       if (err?.name === "TokenExpiredError" && data?.userId) {
         return res.redirect(
-          `${environments.FRONTEND_URL
+          `${
+            environments.FRONTEND_URL
           }/user/verification-expired?user=${encodeURIComponent(data.email)}`
         );
       }
@@ -536,7 +537,7 @@ exports.verifyToken = async function (req, res) {
   try {
     const token = req.params.token;
     const decoded = jwt.verify(token, environments.JWT_SECRET_KEY);
-    console.log(decoded)
+    console.log(decoded);
     if (decoded.user) {
       res.status(200).send({ message: "Authorized User", verifiedToken: true });
     } else {
@@ -562,7 +563,8 @@ exports.createAdmin = async function (req, res) {
             return utils.send500(res, err);
           } else {
             // let message = "You're now Master-Admin!";
-            let message = "We're thrilled to announce that you've been granted Master Admin/ Admin privileges on our platform! 🎉";
+            let message =
+              "We're thrilled to announce that you've been granted Master Admin/ Admin privileges on our platform! 🎉";
             const userDetails = {
               firstName: user.FirstName,
               lastName: user.LastName,
@@ -581,5 +583,18 @@ exports.createAdmin = async function (req, res) {
     }
   } catch {
     res.status(401).json({ message: "Unauthorized User" });
+  }
+};
+
+exports.getStats = async function (req, res) {
+  console.log("innn");
+  const countryCode = req?.query?.countryCode;
+  if (countryCode) {
+    const states = await User.getStats(countryCode);
+    if (states) {
+      res.json(states);
+    } else {
+      res.status(404).send({ message: "not found" });
+    }
   }
 };

@@ -121,7 +121,9 @@ User.create = function (userData, result) {
 };
 
 User.findAndSearchAll = async (limit, offset, search, startDate, endDate) => {
-  let whereCondition = `${search ? `u.Username LIKE '%${search}%' OR u.Email LIKE '%${search}%'` : ""}`;
+  let whereCondition = `${
+    search ? `u.Username LIKE '%${search}%' OR u.Email LIKE '%${search}%'` : ""
+  }`;
   if (startDate && endDate) {
     whereCondition += `${
       search ? `AND` : ``
@@ -496,6 +498,14 @@ User.findAdmin = async function () {
   const [user] = await executeQuery(query);
   console.log(user);
   return user;
+};
+
+User.getStats = async function (countryCode) {
+  const query =
+    "select state,country_code from zip_us where country_code = ? and state != '' group by state";
+  const values = [countryCode];
+  const stats = await executeQuery(query, values);
+  return stats;
 };
 
 module.exports = User;
