@@ -99,10 +99,6 @@ exports.changeUserStatus = async function (data) {
 
 const getChatList = async function (params) {
   try {
-    // const query = `select r.id as roomId,count(m.id) as unReadMessage ,r.profileId1 as createdBy, r.isAccepted,p.ID as profileId,p.Username,p.FirstName,p.lastName,p.ProfilePicName from chatRooms as r join profile as p on p.ID = CASE
-    //               WHEN r.profileId1 = ${params.profileId} THEN r.profileId2
-    //               WHEN r.profileId2 = ${params.profileId} THEN r.profileId1
-    //               END left join messages as m on m.roomId = roomId and m.sentBy != ${params.profileId} and m.isRead = 'N' where r.profileId1 = ? or r.profileId2 = ? order by roomId`;
     const query = `SELECT
                   r.id AS roomId,
                   COUNT(CASE WHEN m.id IS NOT NULL THEN 1 END) AS unReadMessage,
@@ -657,7 +653,7 @@ const declineCall = async function (params) {
         roomId: params?.roomId,
         notificationByProfileId: params?.notificationByProfileId || null,
         actionType: "DC",
-        msg: "Declined call..",
+        msg: params.message || "call decline...",
       };
       const notification = await createNotification(data);
       return notification;
@@ -727,9 +723,10 @@ const createGroups = async function (params) {
             groupId: params?.groupId,
             profileId: id,
           };
-          if (!params.isUpdate) {
+          if (params.isUpdate) {
             const memberId = await addMembers(data);
           }
+          // if (memberId) {
           console.log("ids==>", id);
           const notification = await createNotification({
             notificationByProfileId: params?.profileId,
@@ -738,8 +735,8 @@ const createGroups = async function (params) {
             groupId: params?.groupId,
             msg: `${
               params?.isUpdate
-                ? "changed group details"
-                : "added you in chat group"
+                ? "added you in chat group"
+                : "changed group details"
             }`,
           });
           notifications.push(notification);
