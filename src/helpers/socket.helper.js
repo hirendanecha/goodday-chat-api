@@ -726,6 +726,25 @@ socket.config = (server) => {
         cb(error);
       }
     });
+    socket.on("get-messages", async (params, cb) => {
+      logger.info("get-messages", {
+        ...params,
+        address,
+        id: socket.id,
+        method: "get-messages",
+      });
+      try {
+        if (params) {
+          const data = await chatService.getMessages(params);
+          console.log("messageList==>", data);
+          if (cb) {
+            return cb(data);
+          }
+        }
+      } catch (error) {
+        cb(error);
+      }
+    });
   });
 };
 

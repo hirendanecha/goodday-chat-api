@@ -1,5 +1,6 @@
 const { executeQuery } = require("../helpers/utils");
 const { notificationMailOnInvite } = require("../helpers/utils");
+const { getPagination, getCount, getPaginationData } = require("../helpers/fn");
 const moment = require("moment");
 
 exports.getChatList = async function (params) {
@@ -95,6 +96,10 @@ exports.userStatus = async function (id) {
 };
 exports.changeUserStatus = async function (data) {
   return await changeUserStatus(data);
+};
+
+exports.getMessages = async function (data) {
+  return await getMessages(data);
 };
 
 const getChatList = async function (params) {
@@ -931,5 +936,57 @@ const changeUserStatus = async function (params) {
     return data;
   } catch (error) {
     return error;
+  }
+};
+
+const getMessages = async (params) => {
+  const { limit, offset } = getPagination(params.page, params.size);
+  const searchCount = await executeQuery(
+    `SELECT count(m.id) as count FROM messages as m WHERE roomId = ${params.roomId} or groupId = ${params.groupId}`
+  );
+  const searchData = await executeQuery(
+    `select m.*,p.Username,p.ProfilePicName,p.FirstName from messages as m left join profile as p on p.ID = m.sentBy where m.roomId =${params.roomId} or m.groupId = ${params.groupId} GROUP BY m.id order by m.createdDate desc limit ? offset ?`,
+    [limit, offset]
+  );
+  for (const msg of searchData) {
+    msg["parentMessage"] = await getMessageById(msg?.parentMessageId);
+    // if (msg.groupId) {
+    // }
+  }
+  console.log(searchData[0]);
+  const readBy = await getReadUser(searchData[0]);
+  console.log(readBy);
+  const messageData = getPaginationData(
+    { count: searchCount?.[0]?.count, docs: searchData },
+    params.page,
+    limit
+  );
+  messageData["readUsers"] = readBy;
+  return messageData;
+};
+
+const getMessageById = async function (id) {
+  try {
+    const query =
+      "select m.*,p.Username,p.ProfilePicName,p.FirstName from messages as m left join profile as p on p.ID = m.sentBy where m.id = ?";
+    const values = [id];
+    const [message] = await executeQuery(query, values);
+    return message;
+  } catch (error) {
+    return null;
+  }
+};
+
+const getReadUser = async function (msg) {
+  try {
+    const date = moment(msg?.createdDate)
+      .utc()
+      .local()
+      .format("YYYY-MM-DD HH:mm:ss");
+    const query = `select p.ID,p.Username,p.ProfilePicName,p.FirstName from profile as p left join groupMembers as gm on p.ID = gm.profileId where gm.groupId = ${msg.groupId} and gm.switchDate >= '${date}'`;
+    const readUsers = await executeQuery(query);
+    return readUsers;
+  } catch (error) {
+    return null;
   }
 };
