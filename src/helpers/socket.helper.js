@@ -447,25 +447,17 @@ socket.config = (server) => {
             if (params.groupId) {
               console.log("in=========>");
               io.to(`${params.groupId}`).emit("new-message", data.newMessage);
-              if (data?.notification) {
-                if (data?.notification) {
-                  io.to(`${params.groupId}`).emit(
-                    "notification",
-                    data?.notification
-                  );
-                }
-              }
+              io.to(`${params.groupId}`).emit(
+                "notification",
+                data?.notification
+              );
             } else {
               console.log("in=========>");
               io.to(`${params.roomId}`).emit("new-message", data.newMessage);
-              if (data?.notification) {
-                if (data?.notification) {
-                  io.to(`${params.roomId}`).emit(
-                    "notification",
-                    data?.notification
-                  );
-                }
-              }
+              io.to(`${params.roomId}`).emit(
+                "notification",
+                data?.notification
+              );
             }
             // for (const key in data?.notifications) {
             //   if (Object.hasOwnProperty.call(data?.notifications, key)) {
