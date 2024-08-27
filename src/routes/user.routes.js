@@ -29,6 +29,7 @@ router.post("/get-notification/:id", profileController.getNotificationById);
 router.post("/set-password", userController.setPassword);
 router.get("/search-user", profileController.getUsersByUsername);
 router.get("/:id", userController.findById);
+router.put("/onOff-notification", profileController.editNotificationSound);
 router.put("/:id", userController.update);
 router.put("/profile/:id", profileController.updateProfile);
 router.get("/notification/:id", profileController.getNotification);

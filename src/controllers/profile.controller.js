@@ -118,6 +118,20 @@ exports.editNotifications = async function (req, res) {
   });
 };
 
+exports.editNotificationSound = async function (req, res) {
+  try {
+    const { id } = req.user;
+    const { property, value } = req.body;
+    await Profile.editNotificationSound(id, property, value);
+    return res.json({
+      error: false,
+      message: "successfully changed notification sound",
+    });
+  } catch (error) {
+    return utils.send500(res, error);
+  }
+};
+
 exports.getNotificationById = async function (req, res) {
   const { id } = req.params;
   const { page, size } = req.body;
