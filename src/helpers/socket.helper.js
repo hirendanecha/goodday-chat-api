@@ -220,6 +220,7 @@ socket.config = (server) => {
           const data = await chatService.createChatRoom(params);
           if (data?.room) {
             // io.to(`${params.profileId2}`).emit("new-room", data.id);
+            socket.join(`${data.room.roomId}`);
             if (data?.notification) {
               if (data?.notification) {
                 io.to(`${data.notification?.notificationToProfileId}`).emit(
@@ -251,20 +252,26 @@ socket.config = (server) => {
           console.log("new-message", data);
           if (data.newMessage) {
             if (params?.groupId) {
+              if (!socket.rooms.has(`${params?.groupId}`)) {
+                socket.join(`${params?.groupId}`);
+              }
               io.to(`${params.groupId}`).emit("new-message", data.newMessage);
               if (data?.notification) {
-                if (data?.notification) {
-                  io.to(`${params.groupId}`).emit(
-                    "notification",
-                    data?.notification
-                  );
-                }
+                io.to(`${params.groupId || socket.user.id}`).emit(
+                  "notification",
+                  data?.notification
+                );
               }
             } else {
-              console.log("in=========>");
-              io.to(`${params.roomId}`).emit("new-message", data.newMessage);
+              if (!socket.rooms.has(`${params?.roomId}`)) {
+                socket.join(`${params?.roomId}`);
+              }
+              io.to(`${params.roomId || socket.user.id}`).emit(
+                "new-message",
+                data.newMessage
+              );
               if (data?.notification) {
-                io.to(`${params?.roomId}`).emit(
+                io.to(`${data?.notification?.notificationToProfileId}`).emit(
                   "notification",
                   data?.notification
                 );
@@ -347,6 +354,9 @@ socket.config = (server) => {
           const data = await chatService.acceptRoom(params);
           console.log(data);
           if (data) {
+            if (!socket.rooms.has(`${data?.room?.roomId}`)) {
+              socket.join(`${data?.room?.roomId}`);
+            }
             io.to(`${data?.notification?.notificationToProfileId}`).emit(
               "notification",
               data?.notification
@@ -643,9 +653,9 @@ socket.config = (server) => {
           };
           data["Username"] = await chatService.getUserDetails(data.profileId);
           if (params.roomId) {
-            io.to(`${data?.roomId}`).emit("typing", data);
+            io.to(`${data?.roomId || socket.user.id}`).emit("typing", data);
           } else {
-            io.to(`${data?.groupId}`).emit("typing", data);
+            io.to(`${data?.groupId || socket.user.id}`).emit("typing", data);
           }
           if (cb) {
             return cb();
@@ -718,6 +728,7 @@ socket.config = (server) => {
         cb(error);
       }
     });
+    
     socket.on("get-messages", async (params, cb) => {
       logger.info("get-messages", {
         ...params,
@@ -735,6 +746,42 @@ socket.config = (server) => {
         }
       } catch (error) {
         cb(error);
+      }
+    });
+
+    socket.on("check-call", async (params, cb) => {
+      logger.info("check-call", {
+        ...params,
+        address,
+        id: socket.id,
+        method: "check-call",
+      });
+      try {
+        if (params) {
+          const data = await chatService.checkCall(params);
+          if (cb) {
+            return cb(data);
+          }
+        }
+      } catch (error) {
+        cb(error);
+      }
+    });
+
+    socket.on("end-call", async (params) => {
+      logger.info("end-call", {
+        ...params,
+        address,
+        id: socket.id,
+        method: "end-call",
+      });
+      try {
+        if (params) {
+          const data = await chatService.endCall(params);
+          console.log(data);
+        }
+      } catch (error) {
+        return error;
       }
     });
   });

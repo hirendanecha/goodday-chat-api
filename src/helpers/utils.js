@@ -51,8 +51,7 @@ exports.registrationMail = async (userData, userId) => {
     {
       userId: userId,
       email: userData.Email,
-    },
-    '5d'
+    }
   );
 
   let registerUrl = `${environment.API_URL}customers/user/verification/${token}`;
@@ -84,8 +83,7 @@ exports.forgotPasswordMail = async (user) => {
       {
         userId: user?.Id,
         email: user.Email
-      },
-      '1d'
+      }
     );
 
     let forgotPasswordUrl = `${environment.FRONTEND_URL}reset-password/user?accesstoken=${token}`;
