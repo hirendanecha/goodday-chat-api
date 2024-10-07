@@ -728,7 +728,7 @@ socket.config = (server) => {
         cb(error);
       }
     });
-    
+
     socket.on("get-messages", async (params, cb) => {
       logger.info("get-messages", {
         ...params,
@@ -778,10 +778,52 @@ socket.config = (server) => {
       try {
         if (params) {
           const data = await chatService.endCall(params);
-          console.log(data);
+          if (params.roomId) {
+            return io.to(`${params.roomId}`).emit("notification", {
+              actionType: "EC",
+              roomId: params.roomId,
+              notificationByProfileId: params.profileId,
+            });
+          }
+          return;
         }
       } catch (error) {
         return error;
+      }
+    });
+
+    socket.on("suspend-user", async (params, cb) => {
+      logger.info("suspend-user", {
+        ...params,
+        address,
+        id: socket.id,
+        method: "suspend-user",
+      });
+      try {
+        if (params) {
+          const data = await chatService.suspendUser(params);
+          const notificationData = {
+            actionType: "S",
+            notificationDesc: "Your account has been suspended by Admin",
+          };
+          if (data) {
+            if (params.isSuspended === "Y") {
+              io.to(`${params.profileId}`).emit(
+                "notification",
+                notificationData
+              );
+            }
+            cb({
+              error: false,
+              message:
+                params.isSuspended === "Y"
+                  ? "User suspend successfully"
+                  : "User unsuspend successfully",
+            });
+          }
+        }
+      } catch (error) {
+        cb(error);
       }
     });
   });

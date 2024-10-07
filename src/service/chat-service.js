@@ -110,6 +110,10 @@ exports.checkCall = async function (data) {
   return await checkCall(data);
 };
 
+exports.suspendUser = function (data) {
+  return suspendUser(data);
+};
+
 const getChatList = async function (params) {
   try {
     const query = `SELECT
@@ -1057,6 +1061,17 @@ const checkCall = async function (data) {
     const query = `select * from calls_logs where profileId = ${data?.profileId} and isOnCall = 'Y' and endDate is null`;
     const [callData] = await executeQuery(query);
     return callData;
+  } catch (error) {
+    return error;
+  }
+};
+
+const suspendUser = async function (params) {
+  try {
+    const query = "UPDATE users SET IsSuspended = ? WHERE Id= ?";
+    const values = [params.isSuspended, params.id];
+    const user = await executeQuery(query, values);
+    return user;
   } catch (error) {
     return error;
   }
