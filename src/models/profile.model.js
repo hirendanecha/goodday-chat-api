@@ -75,33 +75,35 @@ Profile.FindById = async function (profileId) {
   //     }
   //   }
   // );
-  const query = `SELECT ID as Id,
-    FirstName,
-    LastName,
-    UserID,
-    MobileNo,
-    Gender,
-    DateofBirth,
-    Address,
-    City,
-    State,
-    Zip,
-    Country,
-    Business_NP_TypeID,
-    CoverPicName,
-    IsActivated,
-    Username,
-    ProfilePicName,
-    EmailVerified,
-    CreatedOn,
-    AccountType,
-    MediaApproved,
-    County,
-    userStatus,
-    messageNotificationSound,
-    callNotificationSound,
-    tagNotificationSound
-  FROM profile WHERE ID=?`;
+  const query = `SELECT
+    p.ID as Id,
+    u.Email,
+    p.FirstName,
+    p.LastName,
+    p.UserID,
+    p.MobileNo,
+    p.Gender,
+    p.DateofBirth,
+    p.Address,
+    p.City,
+    p.State,
+    p.Zip,
+    p.Country,
+    p.Business_NP_TypeID,
+    p.CoverPicName,
+    p.IsActivated,
+    p.Username,
+    p.ProfilePicName,
+    p.EmailVerified,
+    p.CreatedOn,
+    p.AccountType,
+    p.MediaApproved,
+    p.County,
+    p.userStatus,
+    p.messageNotificationSound,
+    p.callNotificationSound,
+    p.tagNotificationSound
+  FROM profile as p LEFT JOIN users as u on u.Id = p.UserID  WHERE p.ID=?`;
   const values = profileId;
   let profile = await executeQuery(query, values);
   return profile;
