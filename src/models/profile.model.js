@@ -23,9 +23,11 @@ var Profile = function (profile) {
   this.ProfilePicName = profile.ProfilePicName;
   this.IsActivated = profile.IsActive;
   this.CreatedOn = new Date();
-  this.callNotificationSound = profile.callNotificationSound;
-  this.messageNotificationSound = profile.messageNotificationSound;
-  this.tagNotificationSound = profile.tagNotificationSound;
+  this.callNotificationSound = profile.callNotificationSound || 'Y';
+  this.messageNotificationSound = profile.messageNotificationSound || 'Y';
+  this.tagNotificationSound = profile.tagNotificationSound || 'Y';
+  this.messageNotificationEmail = profile?.messageNotificationEmail || 'Y';
+  this.postNotificationEmail = profile?.postNotificationEmail || 'Y';
 };
 
 Profile.create = function (profileData, result) {
@@ -75,35 +77,39 @@ Profile.FindById = async function (profileId) {
   //     }
   //   }
   // );
-  const query = `SELECT
-    p.ID as Id,
-    u.Email,
-    p.FirstName,
-    p.LastName,
-    p.UserID,
-    p.MobileNo,
-    p.Gender,
-    p.DateofBirth,
-    p.Address,
-    p.City,
-    p.State,
-    p.Zip,
-    p.Country,
-    p.Business_NP_TypeID,
-    p.CoverPicName,
-    p.IsActivated,
-    p.Username,
-    p.ProfilePicName,
-    p.EmailVerified,
-    p.CreatedOn,
-    p.AccountType,
-    p.MediaApproved,
-    p.County,
-    p.userStatus,
-    p.messageNotificationSound,
-    p.callNotificationSound,
-    p.tagNotificationSound
-  FROM profile as p LEFT JOIN users as u on u.Id = p.UserID  WHERE p.ID=?`;
+  const query = `SELECT 
+            u.Email,
+            u.Username,
+            u.IsActive,
+            u.DateCreation,
+            u.IsAdmin,
+            u.FirstName,
+            u.LastName,
+            u.Address,
+            u.Country,
+            u.City,
+            u.State,
+            u.Zip,
+            u.IsSuspended,
+            u.AccountType,
+            p.ID as profileId,
+            p.County,
+            p.UserID,
+            p.CoverPicName,
+            p.ProfilePicName,
+            p.MobileNo,
+            p.MediaApproved,
+            p.ChannelType,
+            p.DefaultUniqueLink,
+            p.UniqueLink,
+            p.AccountType,
+            p.userStatus,
+            p.messageNotificationSound,
+            p.callNotificationSound,
+            p.tagNotificationSound,
+            p.messageNotificationEmail,
+            p.postNotificationEmail
+        FROM users as u left join profile as p on p.UserID = u.Id AND p.AccountType in ('I','M') WHERE p.ID=?`;
   const values = profileId;
   let profile = await executeQuery(query, values);
   return profile;
@@ -136,15 +142,65 @@ Profile.getUsersByUsername = async function (searchText) {
   }
 };
 
+// Profile.getNotificationById = async function (id, limit, offset) {
+//   if (id) {
+//     const query = `select n.*,p.Username,p.FirstName,p.ProfilePicName from notifications as n left join profile as p on p.ID = n.notificationByProfileId left join groupMembers as g on g.groupId = n.groupId and g.profileId != n.notificationByProfileId where g.profileId = ? OR n.notificationToProfileId =? order by n.createDate desc limit ${limit} offset ${offset}`;
+//     const values = [id, id];
+//     const searchCount = await executeQuery(
+//       `SELECT count(id) as count FROM notifications as n WHERE n.notificationToProfileId = ${id}`
+//     );
+//     const notificationData = await executeQuery(query, values);
+//     // return notificationData;
+//     return {
+//       count: searchCount?.[0]?.count || 0,
+//       data: notificationData,
+//     };
+//   } else {
+//     return { error: "data not found" };
+//   }
+// };
+
 Profile.getNotificationById = async function (id, limit, offset) {
   if (id) {
-    const query = `select n.*,p.Username,p.FirstName,p.ProfilePicName from notifications as n left join profile as p on p.ID = n.notificationByProfileId left join groupMembers as g on g.groupId = n.groupId and g.profileId != n.notificationByProfileId where g.profileId = ? OR n.notificationToProfileId =? order by n.createDate desc limit ${limit} offset ${offset}`;
-    const values = [id, id];
-    const searchCount = await executeQuery(
-      `SELECT count(id) as count FROM notifications as n WHERE n.notificationToProfileId = ${id}`
-    );
+    const query = `
+      SELECT n.*, 
+             p.Username, 
+             p.FirstName, 
+             p.ProfilePicName,
+             g.groupName,
+             g.profileImage
+      FROM notifications AS n
+      LEFT JOIN profile AS p 
+        ON p.ID = n.notificationByProfileId
+      LEFT JOIN chatGroups AS g 
+        ON g.id = n.groupId
+      LEFT JOIN groupMembers AS gm 
+        ON gm.groupId = n.groupId 
+           AND gm.profileId = ?
+      WHERE gm.profileId != n.notificationByProfileId AND gm.profileId = ? 
+         OR n.notificationToProfileId = ?
+      GROUP BY n.id
+      ORDER BY n.createDate DESC
+      LIMIT ? OFFSET ?`;
+
+    const values = [id, id, id, limit, offset];
+
+    // Fetch notification count
+    const searchCountQuery = `
+      SELECT COUNT(DISTINCT n.id) AS count 
+      FROM notifications AS n
+      LEFT JOIN groupMembers AS g 
+        ON g.groupId = n.groupId 
+           AND g.profileId = ?
+      WHERE g.profileId = ? 
+         OR n.notificationToProfileId = ?`;
+    const searchCountValues = [id, id, id];
+
+    const searchCount = await executeQuery(searchCountQuery, searchCountValues);
     const notificationData = await executeQuery(query, values);
-    // return notificationData;
+
+    console.log("notificationData", notificationData);
+
     return {
       count: searchCount?.[0]?.count || 0,
       data: notificationData,

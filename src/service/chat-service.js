@@ -777,34 +777,39 @@ const createGroups = async function (params) {
 
       let notifications = [];
       let groupList = {};
-      if (params.profileIds.length > 0) {
-        for (const id of params.profileIds) {
-          const data = {
-            groupId: params?.groupId,
-            profileId: id,
-          };
-          if (params.isUpdate) {
+      if (params.isUpdate) {
+        if (params.profileIds.length >= 0) {
+          for (const id of params.profileIds) {
+            const data = {
+              groupId: params?.groupId,
+              profileId: id,
+            };
             const memberId = await addMembers(data);
+            console.log("ids==>", id);
+            const notification = await createNotification({
+              notificationByProfileId: params?.profileId,
+              notificationToProfileId: id,
+              actionType: "M",
+              groupId: params?.groupId,
+              msg: `${"added you in chat group"}`,
+            });
+            notifications.push(notification);
           }
           // if (memberId) {
-          console.log("ids==>", id);
-          const notification = await createNotification({
-            notificationByProfileId: params?.profileId,
-            notificationToProfileId: id,
-            actionType: "M",
-            groupId: params?.groupId,
-            msg: `${
-              params?.isUpdate
-                ? "added you in chat group"
-                : "changed group details"
-            }`,
-          });
-          notifications.push(notification);
+
+          // }
+        } else {
+          groupList = await getGroup(params);
+          return { groupList };
         }
       } else {
-        groupList = await getGroup(params);
-        console.log("getttt===>");
-        return { groupList };
+        const notification = await createNotification({
+          notificationByProfileId: params?.profileId,
+          actionType: "M",
+          groupId: params?.groupId,
+          msg: `${"changed group details"}`,
+        });
+        notifications.push(notification);
       }
       groupList = await getGroup(params);
       return { notifications, groupList, groupId: params?.groupId };

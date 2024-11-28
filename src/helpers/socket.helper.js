@@ -3,6 +3,7 @@ const socket = {};
 const chatService = require("../service/chat-service");
 const environment = require("../environments/environment");
 const jwt = require("jsonwebtoken");
+const Profile = require("../models/profile.model");
 
 socket.config = (server) => {
   const io = require("socket.io")(server, {
@@ -28,17 +29,26 @@ socket.config = (server) => {
           return next(err);
         }
         socket.user = decoded.user;
-        const chatData = await chatService.getRoomsIds(socket.user.id);
-        if (chatData) {
-          for (const roomId of chatData?.roomsIds) {
-            const chat = roomId;
-            console.log(`${chat.roomId}`);
-            socket.join(`${chat.roomId}`);
+        if (decoded.user.username !== "admin") {
+          const [profile] = await Profile.FindById(decoded.user.id);
+          if (profile?.IsSuspended === "Y") {
+            const err = new Error("user has been suspended");
+            return next(err);
           }
-          for (const groupId of chatData?.groupsIds) {
-            const chat = groupId;
-            socket.join(`${chat.groupId}`);
+        }
+        if (socket.user.id) {
+          const chatData = await chatService.getRoomsIds(socket.user.id);
+          if (chatData) {
+            for (const roomId of chatData?.roomsIds) {
+              const chat = roomId;
+              socket.join(`${chat.roomId}`);
+            }
+            for (const groupId of chatData?.groupsIds) {
+              const chat = groupId;
+              socket.join(`${chat.groupId}`);
+            }
           }
+          socket.join(`${socket.user?.id}`);
         }
         socket.join(`${socket.user?.id}`);
         next();
@@ -556,6 +566,11 @@ socket.config = (server) => {
             for (const notification of data?.notifications) {
               if (notification?.notificationToProfileId) {
                 io.to(`${notification?.notificationToProfileId}`).emit(
+                  "notification",
+                  notification
+                );
+              } else {
+                io.to(`${notification?.groupId}`).emit(
                   "notification",
                   notification
                 );
