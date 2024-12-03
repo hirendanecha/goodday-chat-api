@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const env = require("../environments/environment");
 const tokenBlacklist = new Set();
+const Profile = require("../models/profile.model");
 
 exports.authorization = async function (req, res, next) {
   if (req.headers.authorization) {
