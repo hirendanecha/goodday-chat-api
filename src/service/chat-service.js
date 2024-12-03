@@ -694,17 +694,24 @@ const startCall = async function (params) {
 const declineCall = async function (params) {
   try {
     if (params) {
-      const query = `update calls_logs set endDate = now(), isOnCall = 'N' where roomId = ${params.roomId} and isOnCall = 'Y'`;
+      let query = "";
+      if (params?.roomId) {
+        query = `update calls_logs set endDate = now(), isOnCall = 'N' where roomId = ${params.roomId} and isOnCall = 'Y' and endDate is null`;
+      } else {
+        query = `update calls_logs set endDate = now(), isOnCall = 'N' where groupId = ${params.groupId} and profileId = ${params.notificationByProfileId} and isOnCall = 'Y' and endDate is null`;
+      }
+      // const query = `update calls_logs set endDate = now(), isOnCall = 'N' where (roomId = ${params.roomId} or groupId = ${params.groupId}) and isOnCall = 'Y'`;
       await executeQuery(query);
       const data = {
         notificationToProfileId: params?.notificationToProfileId || null,
         roomId: params?.roomId,
+        groupId: params?.groupId,
         notificationByProfileId: params?.notificationByProfileId || null,
         actionType: "DC",
         msg: params.message || "call decline...",
       };
-      const notification = await createNotification(data);
-      return notification;
+      // const notification = await createNotification(data);
+      return params?.roomId ? data : {};
     }
   } catch (error) {
     return error;
@@ -733,10 +740,11 @@ const pickUpCall = async function (params) {
         notificationByProfileId: params?.notificationByProfileId || null,
         actionType: "SC",
         msg: "call start...",
+        link: params?.link,
       };
-      const notification = await createNotification(data);
-      notification["link"] = params?.link;
-      return notification;
+      // const notification = await createNotification(data);
+      // notification["link"] = params?.link;
+      return data;
     }
   } catch (error) {
     return error;

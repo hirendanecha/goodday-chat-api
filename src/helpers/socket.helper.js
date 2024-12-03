@@ -505,10 +505,10 @@ socket.config = (server) => {
       try {
         if (params) {
           const data = await chatService.declineCall(params);
-          if (params?.roomId) {
+          if (params?.roomId && data) {
             io.to(`${params?.roomId}`).emit("notification", data);
             return cb(true);
-          } else if (params.groupId) {
+          } else if (params.groupId && data) {
             console.log("decline-group-calll===>>>>>>>>>>>>>>>>>>>>>", data);
             io.to(`${params?.groupId}`).emit("notification", data);
             return cb(true);
